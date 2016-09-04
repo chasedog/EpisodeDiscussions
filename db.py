@@ -23,6 +23,17 @@ class DB:
     def __init__(self):
         self.conn = sqlite3.connect(db_file)
 
+    def getTrainingData(self, table=training_data_table_name):
+        def dict_factory(cursor, row):
+            d = {}
+            for idx, col in enumerate(cursor.description):
+                d[col[0]] = row[idx]
+            return d
+        self.conn.row_factory = dict_factory
+        cursor = self.cursor()
+        cursor.execute("select * from {table}".format(table=table))
+        return cursor.fetchall()
+
     def destroy(self):
         for table in tables:
             self.drop_table(table["name"])
