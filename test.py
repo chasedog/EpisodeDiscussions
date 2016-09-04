@@ -1,8 +1,9 @@
 import praw
-import datetime
 import db
 from db import DB
-import re
+import classifiers
+import training
+
 conn = DB()
 
 user_agent = "EpisodeDiscussions 1.0 by chasedog"
@@ -12,17 +13,36 @@ reddit = praw.Reddit(user_agent=user_agent)
 #posts = reddit.search("title:episode discussion flair:'Season 1'", subreddit="gameofthrones", sort="new", limit=20)
 #posts = reddit.search("flair:discussion", subreddit="raydonovan", sort="new", limit=100)
 #posts = reddit.search("episode discussion", subreddit="southpark", sort="relevance", limit=500)
-posts = reddit.search("discussion", subreddit="breakingbad", sort="relevance", limit=500)
+#posts = reddit.search("discussion", subreddit="breakingbad", sort="relevance", limit=500)
+posts = reddit.search("discussion", subreddit="IASIP", sort="relevance", limit=500)
 
 insertData = []
 columns = db.tables[0]["columns"]
+def mapToDict(data):
+    dataDict = {}
+    columns = [c for c in db.tables[0]["columns"] if "ignore" not in c]
+
+    for idx, column in enumerate(columns):
+        dataDict[column["db"]] = data[idx]
+
+    return dataDict
+
+classifier = training.getClassifier()
 
 for post in posts:
-    data = tuple([getattr(post, column["db"][0]) if "mapper" not in column else getattr(getattr(post, column["db"][0]), column["mapper"]) for column in columns if "ignore" not in column])
+    tupledData = []
+    dataDict = {}
+    for column in [column for column in columns if "ignore" not in column]:
+        fieldName = column["db"][0]
+        value = getattr(post, fieldName) if "mapper" not in column else getattr(getattr(post, fieldName), column["mapper"])
+        tupledData.append(value)
+        dataDict[fieldName] = value
 
-    is_valid = re.search(r'(Season|S)?:?\d{1,2}\s?,?\.?X?(Episode|Ep|E)?:?\d{1,2}', data[1]) is not None and "Pre-" not in data[1]
-    data = (is_valid,) + data
+    features = classifiers.getFeatures(dataDict)
+
+    is_valid = classifier.classify(features) == "yes"
+    data = (is_valid,) + tuple(tupledData)
     insertData.append(data)
 
-print([(d[0],d[2]) for d in insertData])
+#print([(d[0],d[2]) for d in insertData])
 conn.insertManyTrainingData(insertData)
