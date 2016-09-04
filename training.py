@@ -1,21 +1,34 @@
 from db import DB
-import re
 import nltk
 import random
-from nltk import classify
+import classifiers
 
-def getFeatures(post):
-    hasSeasonAndEpisode = re.search(r'(Season|S)?:?\d{1,2}\s?,?\.?X?(Episode|Ep|E)?:?\d{1,2}', post["title"]) is not None and "Pre-" not in post["title"]
-    return ({"hasSeasonAndEpisode": hasSeasonAndEpisode}, post["is_valid"])
+def getClassifier():
+    conn = DB()
 
+    data = conn.getTrainingData()
+
+    random.shuffle(data)
+
+    feature_sets = [(classifiers.getFeatures(d), "yes" if d["is_valid"] else "no") for d in data]
+    train_set, test_set = feature_sets[:1500], feature_sets[1500:]
+
+    classifier = nltk.NaiveBayesClassifier.train(train_set)
+    classifier.show_most_informative_features(10)
+    conn.close()
+    print(nltk.classify.accuracy(classifier, test_set))
+    return classifier
+
+
+classifier = getClassifier()
 
 conn = DB()
+#conn.create()
 
 data = conn.getTrainingData()
-
-random.shuffle(data)
-
-train_set = [getFeatures(d) for d in data[:500]]
-
-classifier = nltk.NaiveBayesClassifier.train(train_set)
-classifier.show_most_informative_features(5)
+for row in data:
+    features = classifiers.getFeatures(row)
+    is_valid = classifier.classify(features) == "yes"
+    if row["is_valid"] != is_valid:
+        print("{}->{} {} {}".format(row["is_valid"], is_valid, row["id"], row["title"]))
+conn.close()
