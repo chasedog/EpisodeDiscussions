@@ -3,6 +3,10 @@ from datetime import datetime, timedelta
 from enum import Enum
 from inspect import ismethod
 
+somethingInQuotesRegex = r"""("[^"]+"|'[^']+'|”[^”]+”)"""
+ff =              r'(((?:season|s)?\s?:?(\d{1,2}))\s?,?-?\s?\.?x?((?:episode|ep|e)?\s?:?0*(\d{1,2})))'
+formattedSERegex = r'((?:season|s)?\s?:?(\d{1,2}))\s?,?-?\s?\.?x?((?:episode|ep|e)?\s?:?0*(\d{1,2}))'
+
 class PostTitleClassifiers:
     def containsSurveyResults(self, title):
         return "survey results" in title
@@ -17,7 +21,7 @@ class PostTitleClassifiers:
         return "rewatch" in title
 
     def containsSomethingInQuotes(self, title):
-        return re.search(r"""("[^"]+"|'[^']+')""", title) is not None
+        return re.search(somethingInQuotesRegex, title) is not None
 
     def containsSomethingInQuotesPlusDiscussion(self, title):
         return re.search(r"""("[^"]+"|'[^']+')\sdiscussion""", title) is not None
@@ -55,7 +59,7 @@ class PostTitleClassifiers:
         return string[-1] == '?'
 
     def containsFormattedSE(self, string):
-        return re.search(r'((?:season|s)?\s?:?\d{1,2})\s?,?\.?x?((?:episode|ep|e)?\s?:?\d{1,2})', string) is not None
+        return re.search(r'%s' % formattedSERegex, string) is not None
 
     def containsFormattedSEPlusDiscussion(self, string):
         return re.search(r'((?:season|s)?\s?:?\d{1,2})\s?,?\.?x?((?:episode|ep|e)?\s?:?\d{1,2})\sdiscussion', string) is not None

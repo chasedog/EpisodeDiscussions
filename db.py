@@ -23,15 +23,22 @@ class DB:
     def __init__(self):
         self.conn = sqlite3.connect(db_file)
 
+    def _dict_factory(self, cursor, row):
+        d = {}
+        for idx, col in enumerate(cursor.description):
+            d[col[0]] = row[idx]
+        return d
+
     def getTrainingData(self, table=training_data_table_name):
-        def dict_factory(cursor, row):
-            d = {}
-            for idx, col in enumerate(cursor.description):
-                d[col[0]] = row[idx]
-            return d
-        self.conn.row_factory = dict_factory
+        self.conn.row_factory = self._dict_factory
         cursor = self.cursor()
         cursor.execute("select * from {table}".format(table=table))
+        return cursor.fetchall()
+
+    def getValidDiscussionData(self, table=training_data_table_name):
+        self.conn.row_factory = self._dict_factory
+        cursor = self.cursor()
+        cursor.execute("select * from {table} where is_valid = 1".format(table=table))
         return cursor.fetchall()
 
     def destroy(self):
