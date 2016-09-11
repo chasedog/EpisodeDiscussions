@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
+    <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
+    <style type="text/css">
+        .episodeTable {
+            width: 700px;
+            margin-right:auto;
+            margin-left:auto;
+        }
+        .episodeTable tr th {
+            font-size: 2em;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Episode Discussions r/{{ subreddit }}</title>
+</head>
+<body>
+    <div class="mdl-card__title episodeTable">
+        <h2 class="mdl-card__title-text">r/{{ subreddit }} discussions</h2>
+    </div>
+    {% for season in result if season.number > 0 %}
+        <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp episodeTable center">
+            <thead>
+                <tr>
+                    <th>Season {{ "unknown" if season.number == -1 else season.number }} {{ "(rewatch)" if season.is_rewatch else "" }}</th>
+                    <th class="mdl-data-table__cell--non-numeric">Title</th>
+                    <th class="mdl-data-table__cell--non-numeric">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+        {% for episode in season.episodes %}
+                <tr >
+                    <td >{{ episode.number}}</td>
+                    <td class="mdl-data-table__cell--non-numeric" ><a class="{{'mdl-badge' if episode.prePostText else ''}}" data-badge="{{ episode.prePostText }}" href="{{episode.url}}"> {{ episode.title }}</a></td>
+                    <td class="mdl-data-table__cell--non-numeric">{{ episode.date_pacific }}</td>
+                </tr>
+        {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+
+</body>
+</html>

@@ -3,6 +3,7 @@ import db
 from db import DB
 import classifiers
 import training
+import stats
 
 conn = DB()
 
@@ -14,10 +15,11 @@ reddit = praw.Reddit(user_agent=user_agent)
 #posts = reddit.search("flair:discussion", subreddit="raydonovan", sort="new", limit=100)
 #posts = reddit.search("episode discussion", subreddit="southpark", sort="relevance", limit=500)
 #posts = reddit.search("discussion", subreddit="breakingbad", sort="relevance", limit=500)
-posts = reddit.search("discussion OR thread", subreddit="suits", sort="relevance", limit=1500)
 
-insertData = []
+
+
 columns = db.tables[0]["columns"]
+
 def mapToDict(data):
     dataDict = {}
     columns = [c for c in db.tables[0]["columns"] if "ignore" not in c]
@@ -27,10 +29,10 @@ def mapToDict(data):
 
     return dataDict
 
-if __name__ == "__main__":
-    import stats
+def getData(subreddit):
+    insertData = []
     classifier = training.getClassifier()
-
+    posts = reddit.search("discussion OR thread", subreddit=subreddit, sort="relevance", limit=1500)
     for post in posts:
         tupledData = []
         dataDict = {}
@@ -47,7 +49,10 @@ if __name__ == "__main__":
         if is_valid:
             data = (is_valid,) + tuple(tupledData)
             insertData.append(dataDict)
+    return insertData
 
-    stats.printEpisodes(insertData)
+if __name__ == "__main__":
+    data = getData("madmen")
+    stats.extractSeasonsAndEpisodes(data)
 #print([(d[0],d[2]) for d in insertData])
 #conn.insertManyTrainingData(insertData)

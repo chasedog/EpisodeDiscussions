@@ -4,8 +4,8 @@ from enum import Enum
 from inspect import ismethod
 
 somethingInQuotesRegex = r"""("[^"]+"|'[^']+'|”[^”]+”)"""
-ff =              r'(((?:season|s)?\s?:?(\d{1,2}))\s?,?-?\s?\.?x?((?:episode|ep|e)?\s?:?0*(\d{1,2})))'
-formattedSERegex = r'((?:season|s)?\s?:?(\d{1,2}))\s?,?-?\s?\.?x?((?:episode|ep|e)?\s?:?0*(\d{1,2}))'
+ff =              r'(((?:season|s)?\s?:?(\d{1,2})):?\s?,?-?\s?\.?x?((?:episode|ep|e)?\s?:?0*(\d{1,2})))'
+formattedSERegex = r'((?:season|s)?\s?:?(\d{1,2})):?\s?,?-?\s?\.?x?((?:episode|ep|e)?\s?:?0*(\d{1,2}))'
 
 class PostTitleClassifiers:
     def containsSurveyResults(self, title):
