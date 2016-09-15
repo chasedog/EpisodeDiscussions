@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, render_template
-import test, stats, json
+import test, stats, os
 app = Flask(__name__)
 
 cache = {}
@@ -27,4 +27,5 @@ def _getEpisodes(subreddit):
     return seasonsAndEpisodes
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 33507))
+    app.run(debug=True, host='0.0.0.0', port=port)
