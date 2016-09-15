@@ -9,6 +9,7 @@ def getClassifier(all=True):
         with open("classifier.pkl", 'rb') as file:
             classifier = dill.load(file)
             classifier.show_most_informative_features(15)
+            file.close()
             return classifier
     conn = DB()
 
@@ -28,6 +29,7 @@ def getClassifier(all=True):
     print(nltk.classify.accuracy(classifier, test_set))
     with open("classifier.pkl", 'wb') as file:
         dill.dump(classifier, file)
+        file.close()
 
     return classifier
 
