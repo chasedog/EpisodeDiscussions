@@ -2,8 +2,14 @@ from db import DB
 import nltk
 import random
 import classifiers
+import dill, os.path
 
 def getClassifier(all=True):
+    if os.path.isfile("classifier.pkl"):
+        with open("classifier.pkl", 'rb') as file:
+            classifier = dill.load(file)
+            classifier.show_most_informative_features(15)
+            return classifier
     conn = DB()
 
     data = conn.getTrainingData()
@@ -20,6 +26,9 @@ def getClassifier(all=True):
     classifier.show_most_informative_features(10)
     conn.close()
     print(nltk.classify.accuracy(classifier, test_set))
+    with open("classifier.pkl", 'wb') as file:
+        dill.dump(classifier, file)
+
     return classifier
 
 if __name__ == "__main__":
