@@ -16,7 +16,9 @@ def episodes(subreddit):
 @app.route('/api/r/<string:subreddit>', methods=['GET'])
 def get_episodes(subreddit):
     seasonsAndEpisodes = _getEpisodes(subreddit)
-    return jsonify([season.serialize() for season in seasonsAndEpisodes])
+    seasons = [season.serialize() for season in seasonsAndEpisodes]
+    result = {"seasons": seasons, "subreddit": subreddit}
+    return jsonify(result)
 
 def _getEpisodes(subreddit):
     if subreddit in cache:
