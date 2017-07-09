@@ -21,13 +21,15 @@ class Season:
         }
 
 class Episode:
-    def __init__(self, title, url, number, date_utc, name):
+    def __init__(self, title, url, number, date_utc, name, score, num_comments):
         self.name = name
         self.title = title
         self.url = url
         self.number = number
         self.date_utc = date_utc
         self.date_pacific = (datetime.utcfromtimestamp(self.date_utc) - timedelta(hours=7)).strftime("%m/%d/%Y")
+        self.score = score
+        self.num_comments = num_comments
 
         titleLowered = title.lower()
         containsPre = " pre" in titleLowered
@@ -41,7 +43,9 @@ class Episode:
             'url': self.url,
             'episode_number': self.number,
             'date_utc': self.date_utc,
-            'date_pacific': self.date_pacific
+            'date_pacific': self.date_pacific,
+            'score': self.score,
+            'num_comments': self.num_comments,
         }
 
 def contains(word, capture):
@@ -49,6 +53,7 @@ def contains(word, capture):
 
 def extractSeasonsAndEpisodes(data):
     for item in data:
+        print(item)
         titleLowered = item["title"].lower()
         matches = re.findall(classifiers.ff, titleLowered)
         count = len(matches)
@@ -102,7 +107,7 @@ def extractSeasonsAndEpisodes(data):
             #sortedEpisodes = sorted(seasonGroup, key=lambda x: (x["episode"], x["created_utc"]))
             season = Season(season[0], season[1])
             for item in seasonGroup:
-                episode = Episode(item["title"], item["url"], item["episode"], item["created_utc"], item["episodeName"])
+                episode = Episode(item["title"], item["url"], item["episode"], item["created_utc"], item["episodeName"], item["score"], item["num_comments"])
                 season.addEpisode(episode)
                 #date = datetime.utcfromtimestamp(item["created_utc"]).strftime("%m/%d/%Y")
 

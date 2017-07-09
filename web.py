@@ -23,7 +23,7 @@ def get_episodes(subreddit):
 def _getEpisodes(subreddit):
     if subreddit in cache:
         return cache[subreddit]
-    episodes = test.getData(subreddit)
+    episodes = test.getValidData(subreddit)
     seasonsAndEpisodes = stats.extractSeasonsAndEpisodes(episodes)
     cache[subreddit] = seasonsAndEpisodes
     return seasonsAndEpisodes

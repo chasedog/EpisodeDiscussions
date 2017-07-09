@@ -55,8 +55,11 @@ class PostTitleClassifiers:
     def containsSpoiler(self, string):
         return "spoiler" in string
 
+    def containsChapter(self, string):
+        return "chapter" in string
+
     def endsWithQuestionMark(self, string):
-        return string[-1] == '?'
+        return len(string) > 0 and string[-1] == '?'
 
     def containsFormattedSE(self, string):
         return re.search(r'%s' % formattedSERegex, string) is not None
@@ -65,7 +68,7 @@ class PostTitleClassifiers:
         return re.search(r'((?:season|s)?\s?:?\d{1,2})\s?,?\.?x?((?:episode|ep|e)?\s?:?\d{1,2})\sdiscussion', string) is not None
 
     def endsWithExclamationPoint(self, string):
-        return string[-1] == '!'
+        return len(string) > 0 and string[-1] == '!'
 
 class TimeBucket(Enum):
     morning = 0

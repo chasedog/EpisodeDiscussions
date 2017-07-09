@@ -17,6 +17,10 @@ tables = [{"name": training_data_table_name,
                        {"db": ("score", "int")},
                        {"db": ("link_flair_text", "varchar(300)")},
                        {"db": ("url", "varchar(500)")},
+                       {"db": ("season", "integer"), "ignore": True},
+                       {"db": ("episodeName", "text"), "ignore": True},
+                       {"db": ("episode", "integer"), "ignore": True},
+                       {"db": ("num_comments", "integer")}
                       ]}
          ]
 class DB:
@@ -67,8 +71,10 @@ class DB:
     def insertManyTrainingData(self, data):
         cursor = self.cursor()
         columnLenth = len(data[0]) if len(data) > 0 else 0
+        print(columnLenth, data[0])
         placeholders = ",".join('?' * columnLenth)
-        cursor.executemany(self._insert_into(training_data_table_name) + "VALUES ({})".format(placeholders), data)
+        columns = "VALUES ({placeholders})".format(placeholders=placeholders)
+        cursor.executemany(self._insert_into(training_data_table_name) + columns, data)
         self.commit()
     def insertTrainingData(self, title, created_utc, raw_data, is_valid=None):
         cursor = self.cursor()

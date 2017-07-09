@@ -9,7 +9,7 @@ conn = DB()
 
 user_agent = "EpisodeDiscussions 1.0 by chasedog"
 
-reddit = praw.Reddit(user_agent=user_agent)
+reddit = praw.Reddit(user_agent=user_agent, client_secret="onbDi1nT26b-5lATWO-hRQJyTM8", client_id="GoA8FYqBzRTY2g")
 
 #posts = reddit.search("title:episode discussion flair:'Season 1'", subreddit="gameofthrones", sort="new", limit=20)
 #posts = reddit.search("flair:discussion", subreddit="raydonovan", sort="new", limit=100)
@@ -29,10 +29,10 @@ def mapToDict(data):
 
     return dataDict
 
-def getData(subreddit):
+def getValidData(subreddit):
     insertData = []
     classifier = training.getClassifier()
-    posts = reddit.search("discussion OR thread", subreddit=subreddit, sort="relevance", limit=1500)
+    posts = reddit.subreddit(subreddit).search("discussion OR thread", sort="relevance", limit=1500)
     for post in posts:
         tupledData = []
         dataDict = {}
@@ -47,12 +47,33 @@ def getData(subreddit):
         is_valid = classifier.classify(features) == "yes"
 
         if is_valid:
-            data = (is_valid,) + tuple(tupledData)
             insertData.append(dataDict)
+    return insertData
+
+def getData(subreddit):
+    insertData = []
+    classifier = training.getClassifier()
+    posts = reddit.subreddit(subreddit).search("discussion OR thread", sort="relevance", limit=1500)
+    for post in posts:
+        tupledData = []
+        dataDict = {}
+        for column in [column for column in columns if "ignore" not in column]:
+            fieldName = column["db"][0]
+            value = getattr(post, fieldName) if "mapper" not in column else getattr(getattr(post, fieldName), column["mapper"])
+            tupledData.append(value)
+            dataDict[fieldName] = value
+
+        features = classifiers.getFeatures(dataDict)
+
+        is_valid = classifier.classify(features) == "yes"
+
+        data = (is_valid,) + tuple(tupledData)
+        insertData.append(data)
     return insertData
 
 if __name__ == "__main__":
     data = getData("madmen")
-    stats.extractSeasonsAndEpisodes(data)
-#print([(d[0],d[2]) for d in insertData])
-#conn.insertManyTrainingData(insertData)
+    #stats.extractSeasonsAndEpisodes(data)
+    #print(data)
+    print([(d[0],d[2]) for d in data])
+    #conn.insertManyTrainingData(data)
