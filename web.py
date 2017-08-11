@@ -10,19 +10,31 @@ def hello_world():
 
 @app.route('/r/<string:subreddit>')
 def episodes(subreddit):
-    seasonsAndEpisodes = _getEpisodes(subreddit)
+    seasonsAndEpisodes = _getEpisodesBySeason(subreddit)
     return render_template('index.html', result=seasonsAndEpisodes, subreddit=subreddit)
 
 @app.route('/api/r/<string:subreddit>', methods=['GET'])
 def get_episodes(subreddit):
-    seasonsAndEpisodes = _getEpisodes(subreddit)
-    seasons = [season.serialize() for season in seasonsAndEpisodes]
+    """
+    Endpoint for the GET REST API call.
+    Retrieves episodes by season from the specified subreddit and serializes them into JSON.
+    """
+
+    episodesBySeason = _getEpisodesBySeason(subreddit)
+    seasons = [season.serialize() for season in episodesBySeason]
     result = {"seasons": seasons, "subreddit": subreddit}
     return jsonify(result)
 
-def _getEpisodes(subreddit):
+def _getEpisodesBySeason(subreddit):
+    """
+    Private method.
+    Retrieves episodes by season from the specified subreddit.
+    """
+
+    # Cache only works locally
     if subreddit in cache:
         return cache[subreddit]
+
     episodes = test.getValidData(subreddit)
     seasonsAndEpisodes = stats.extractSeasonsAndEpisodes(episodes)
     cache[subreddit] = seasonsAndEpisodes
